@@ -1,5 +1,6 @@
 package com.company;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -8,9 +9,14 @@ public class CellularAutomata {
     public Cell[][] cells;
     LinkedList<Grain> grains = new LinkedList<Grain>();
     private double cellularTime;
+    private ArrayList<CellCoordinate> availableCellsList = new ArrayList<CellCoordinate>();
+    private ArrayList<CellCoordinate> midStateCellsList = new ArrayList<CellCoordinate>();
+    private int counter;
+    private boolean continuousAddingGrains;
 
-    public CellularAutomata(int numberOfCells) {
+    public CellularAutomata(int numberOfCells, boolean continuousAddingGrains) {
         this.numberOfCells = numberOfCells;
+        this.continuousAddingGrains = continuousAddingGrains;
         cells = new Cell[numberOfCells][numberOfCells];
         for(int i = 0; i < numberOfCells; i++){
             for(int j = 0; j < numberOfCells; j++){
@@ -18,134 +24,199 @@ public class CellularAutomata {
             }
         }
         cellularTime = 0;
+        counter = 0;
     }
     public int calculate(){
+        if(continuousAddingGrains && (counter % 30 == 0) && (availableCellsList.size() != 0) && (midStateCellsList.size() != 0)){
+            addRandomGrain();
+        }
+        int i, j;
         int tmpID;
-        for(int i = 1; i < numberOfCells - 1; i++){
-            for(int j = 1; j < numberOfCells - 1; j++){
-                if(cells[i][j].state == 0){
-                    if(cells[i-1][j].state == 2){
-                        tmpID = cells[i-1][j].grainID;
-                        cells[i][j].grainID = tmpID;
-                        if(grains.get(tmpID).circle){
-                            cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
-                        }
-                        else {
-                            cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                    grains.get(tmpID).angle, i, j,
-                                    grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
-                        }
-                        cells[i][j].changeState();
+        for(int k = 0; k < availableCellsList.size(); k++) {
+            i = availableCellsList.get(k).x;
+            j = availableCellsList.get(k).y;
+            if(cells[i][j].state == 0){
+                if(cells[i-1][j].state == 3){
+                    tmpID = cells[i-1][j].grainID;
+                    cells[i][j].grainID = tmpID;
+                    if(grains.get(tmpID).circle){
+                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
                     }
-                    else if(cells[i+1][j].state == 2){
-                        tmpID = cells[i+1][j].grainID;
-                        cells[i][j].grainID = tmpID;
-                        if(grains.get(tmpID).circle){
-                            cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
-                        }
-                        else {
-                            cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                    grains.get(tmpID).angle, i, j,
-                                    grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
-                        }
-                        cells[i][j].changeState();
+                    else {
+                        cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
+                                grains.get(tmpID).angle, i, j,
+                                grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
                     }
-                    else if(cells[i-1][j-1].state == 2){
-                        tmpID = cells[i-1][j-1].grainID;
-                        cells[i][j].grainID = tmpID;
-                        if(grains.get(tmpID).circle){
-                            cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
-                        }
-                        else {
-                            cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                    grains.get(tmpID).angle, i, j,
-                                    grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
-                        }
-                        cells[i][j].changeState();
+                    cells[i][j].changeState();
+                    availableCellsList.remove(k);
+                    k--;
+                    midStateCellsList.add(new CellCoordinate(i,j));
+                }
+                else if(cells[i+1][j].state == 3){
+                    tmpID = cells[i+1][j].grainID;
+                    cells[i][j].grainID = tmpID;
+                    if(grains.get(tmpID).circle){
+                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
                     }
-                    else if(cells[i][j-1].state == 2){
-                        tmpID = cells[i][j-1].grainID;
-                        cells[i][j].grainID = tmpID;
-                        if(grains.get(tmpID).circle){
-                            cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
-                        }
-                        else {
-                            cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                    grains.get(tmpID).angle, i, j,
-                                    grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
-                        }
-                        cells[i][j].changeState();
+                    else {
+                        cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
+                                grains.get(tmpID).angle, i, j,
+                                grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
                     }
-                    else if(cells[i+1][j-1].state == 2){
-                        tmpID = cells[i+1][j-1].grainID;
-                        cells[i][j].grainID = tmpID;
-                        if(grains.get(tmpID).circle){
-                            cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
-                        }
-                        else {
-                            cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                    grains.get(tmpID).angle, i, j,
-                                    grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
-                        }
-                        cells[i][j].changeState();
+                    cells[i][j].changeState();
+                    availableCellsList.remove(k);
+                    k--;
+                    midStateCellsList.add(new CellCoordinate(i,j));
+                }
+                else if(cells[i-1][j-1].state == 3){
+                    tmpID = cells[i-1][j-1].grainID;
+                    cells[i][j].grainID = tmpID;
+                    if(grains.get(tmpID).circle){
+                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
                     }
-                    else if(cells[i-1][j+1].state == 2){
-                        tmpID = cells[i-1][j+1].grainID;
-                        cells[i][j].grainID = tmpID;
-                        if(grains.get(tmpID).circle){
-                            cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
-                        }
-                        else {
-                            cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                    grains.get(tmpID).angle, i, j,
-                                    grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
-                        }
-                        cells[i][j].changeState();
+                    else {
+                        cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
+                                grains.get(tmpID).angle, i, j,
+                                grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
                     }
-                    else if(cells[i][j+1].state == 2){
-                        tmpID = cells[i][j+1].grainID;
-                        cells[i][j].grainID = tmpID;
-                        if(grains.get(tmpID).circle){
-                            cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
-                        }
-                        else {
-                            cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                    grains.get(tmpID).angle, i, j,
-                                    grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
-                        }
-                        cells[i][j].changeState();
+                    cells[i][j].changeState();
+                    availableCellsList.remove(k);
+                    k--;
+                    midStateCellsList.add(new CellCoordinate(i,j));
+                }
+                else if(cells[i][j-1].state == 3){
+                    tmpID = cells[i][j-1].grainID;
+                    cells[i][j].grainID = tmpID;
+                    if(grains.get(tmpID).circle){
+                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
                     }
-                    else if(cells[i+1][j+1].state == 2){
-                        tmpID = cells[i+1][j+1].grainID;
-                        cells[i][j].grainID = tmpID;
-                        if(grains.get(tmpID).circle){
-                            cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
-                        }
-                        else {
-                            cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                    grains.get(tmpID).angle, i, j,
-                                    grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
-                        }
-                        cells[i][j].changeState();
+                    else {
+                        cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
+                                grains.get(tmpID).angle, i, j,
+                                grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
                     }
+                    cells[i][j].changeState();
+                    availableCellsList.remove(k);
+                    k--;
+                    midStateCellsList.add(new CellCoordinate(i,j));
+                }
+                else if(cells[i+1][j-1].state == 3){
+                    tmpID = cells[i+1][j-1].grainID;
+                    cells[i][j].grainID = tmpID;
+                    if(grains.get(tmpID).circle){
+                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
+                    }
+                    else {
+                        cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
+                                grains.get(tmpID).angle, i, j,
+                                grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
+                    }
+                    cells[i][j].changeState();
+                    availableCellsList.remove(k);
+                    k--;
+                    midStateCellsList.add(new CellCoordinate(i,j));
+                }
+                else if(cells[i-1][j+1].state == 3){
+                    tmpID = cells[i-1][j+1].grainID;
+                    cells[i][j].grainID = tmpID;
+                    if(grains.get(tmpID).circle){
+                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
+                    }
+                    else {
+                        cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
+                                grains.get(tmpID).angle, i, j,
+                                grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
+                    }
+                    cells[i][j].changeState();
+                    availableCellsList.remove(k);
+                    k--;
+                    midStateCellsList.add(new CellCoordinate(i,j));
+                }
+                else if(cells[i][j+1].state == 3){
+                    tmpID = cells[i][j+1].grainID;
+                    cells[i][j].grainID = tmpID;
+                    if(grains.get(tmpID).circle){
+                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
+                    }
+                    else {
+                        cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
+                                grains.get(tmpID).angle, i, j,
+                                grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
+                    }
+                    cells[i][j].changeState();
+                    availableCellsList.remove(k);
+                    k--;
+                    midStateCellsList.add(new CellCoordinate(i,j));
+                }
+                else if(cells[i+1][j+1].state == 3){
+                    tmpID = cells[i+1][j+1].grainID;
+                    cells[i][j].grainID = tmpID;
+                    if(grains.get(tmpID).circle){
+                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
+                    }
+                    else {
+                        cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
+                                grains.get(tmpID).angle, i, j,
+                                grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
+                    }
+                    cells[i][j].changeState();
+                    availableCellsList.remove(k);
+                    k--;
+                    midStateCellsList.add(new CellCoordinate(i,j));
                 }
             }
         }
         afterCalculate();
         cellularTime += 0.7;
-        return 0;
+        counter++;
+        if(midStateCellsList.size() == 0 && availableCellsList.size() == 0) {
+            return 0;
+        }
+        else{
+            return 1;
+        }
     }
     public void afterCalculate(){
-        for(int i = 1; i < numberOfCells - 1; i++){
-            for(int j = 1; j < numberOfCells - 1; j++){
+        int i, j;
+        for(int k = 0; k < midStateCellsList.size(); k++){
+            i = midStateCellsList.get(k).x;
+            j = midStateCellsList.get(k).y;
                 if(cells[i][j].state == 1 && cells[i][j].time <= cellularTime){
                     cells[i][j].changeState();
+                    addNeighbours(i,j);
+                    cells[i][j].changeState();
+                    midStateCellsList.remove(k);
+                    k--;
+                    if(cells[i+1][j].grainID != -1) {
+                        if (cells[i+1][j].grainID != cells[i][j].grainID) {
+                            cells[i][j].changeState();
+                            continue;
+                        }
+                    }
+                    if(cells[i-1][j].grainID != -1) {
+                        if (cells[i-1][j].grainID != cells[i][j].grainID) {
+                            cells[i][j].changeState();
+                            continue;
+                        }
+                    }
+                    if(cells[i][j+1].grainID != -1) {
+                        if (cells[i][j+1].grainID != cells[i][j].grainID) {
+                            cells[i][j].changeState();
+                            continue;
+                        }
+                    }
+                    if(cells[i][j-1].grainID != -1) {
+                        if (cells[i][j-1].grainID != cells[i][j].grainID) {
+                            cells[i][j].changeState();
+                            continue;
+                        }
+                    }
                 }
-            }
         }
     }
     public void addGrain(){
         grains.add(new Grain(250,250,255,0,0, true, 0, 0, 0));
+        cells[250][250].changeState();
         cells[250][250].changeState();
         cells[250][250].changeState();
         cells[250][250].grainID = grains.getLast().ID;
@@ -153,14 +224,17 @@ public class CellularAutomata {
         grains.add(new Grain(75,75,0,255,0, false, 1, 2, 30));
         cells[75][75].changeState();
         cells[75][75].changeState();
+        cells[75][75].changeState();
         cells[75][75].grainID = grains.getLast().ID;
 
         grains.add(new Grain(400,400,0,0,255, false, 1, 1, 45));
         cells[400][400].changeState();
         cells[400][400].changeState();
+        cells[400][400].changeState();
         cells[400][400].grainID = grains.getLast().ID;
 
         grains.add(new Grain(120,300,255,0,255, false, 2, 1, 7));
+        cells[120][300].changeState();
         cells[120][300].changeState();
         cells[120][300].changeState();
         cells[120][300].grainID = grains.getLast().ID;
@@ -181,6 +255,7 @@ public class CellularAutomata {
                     true,0,0,0));
             cells[x][y].changeState();
             cells[x][y].changeState();
+            cells[x][y].changeState();
             cells[x][y].grainID = grains.getLast().ID;
         }
         else{
@@ -188,7 +263,45 @@ public class CellularAutomata {
                     false,random.nextInt(4) + 1,random.nextInt(4) + 1,random.nextInt(91)));
             cells[x][y].changeState();
             cells[x][y].changeState();
+            cells[x][y].changeState();
             cells[x][y].grainID = grains.getLast().ID;
+        }
+        addNeighbours(x,y);
+    }
+
+    private void addNeighbours(int x, int y){
+        boolean flag;
+        for(int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++){
+                if(!(i == 0 && j == 0)){
+                    flag = false;
+                    for(int k = 0; k < availableCellsList.size(); k++){
+                        if(availableCellsList.get(k).isAlready(x + i, y + j)){
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if(flag){
+                        continue;
+                    }
+                    if(cells[x+i][y+j].state != 0){
+                        continue;
+                    }
+                    if(x + i == 0){
+                        continue;
+                    }
+                    if(x + i == numberOfCells-1){
+                        continue;
+                    }
+                    if(y + j == 0){
+                        continue;
+                    }
+                    if(y + j == numberOfCells-1){
+                        continue;
+                    }
+                    availableCellsList.add(new CellCoordinate(x+i, y+j));
+                }
+            }
         }
     }
 
@@ -217,52 +330,5 @@ public class CellularAutomata {
         else{
             return Math.abs(rlx / vi);
         }
-    }
-}
-
-class Cell{
-    public int state;
-    public double time;
-    public int grainID;
-
-    public Cell(){
-        state = 0;
-        time = 0;
-        grainID = -1;
-    }
-    public Cell(int state, int grainID){
-        this.state = state;
-        this.grainID = grainID;
-    }
-    public void changeState(){
-        state++;
-    }
-}
-
-class Grain{
-    static int GrainID = 0;
-    public int ID;
-    public int posX;
-    public int posY;
-    public int R;
-    public int G;
-    public int B;
-    public boolean circle;
-    public double side1;
-    public double side2;
-    public double angle;
-
-    public Grain(int posX, int posY, int r, int g, int b, boolean circle, double side1, double side2, double angle) {
-        this.posX = posX;
-        this.posY = posY;
-        this.circle = circle;
-        this.side1 = side1;
-        this.side2 = side2;
-        this.angle = angle;
-        R = r;
-        G = g;
-        B = b;
-        ID = GrainID;
-        GrainID++;
     }
 }
