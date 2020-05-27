@@ -26,6 +26,11 @@ public class CellularAutomata {
         cellularTime = 0;
         counter = 0;
     }
+
+    public int modulo(int index){
+        return Math.floorMod(index + numberOfCells, numberOfCells);
+    }
+
     public int calculate(){
         if(continuousAddingGrains && (counter % 30 == 0) && (availableCellsList.size() != 0) && (midStateCellsList.size() != 0)){
             addRandomGrain();
@@ -36,15 +41,17 @@ public class CellularAutomata {
             i = availableCellsList.get(k).x;
             j = availableCellsList.get(k).y;
             if(cells[i][j].state == 0){
-                if(cells[i-1][j].state == 3){
-                    tmpID = cells[i-1][j].grainID;
+                if(cells[modulo(i-1)][j].state == 3){
+                    cells[i][j].x = cells[modulo(i-1)][j].x + 1;
+                    cells[i][j].y = cells[modulo(i-1)][j].y;
+                    tmpID = cells[modulo(i-1)][j].grainID;
                     cells[i][j].grainID = tmpID;
                     if(grains.get(tmpID).circle){
-                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
+                        cells[i][j].time = timeCircle(cells[i][j].x,cells[i][j].y,grains.get(tmpID).posX,grains.get(tmpID).posY);
                     }
                     else {
                         cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                grains.get(tmpID).angle, i, j,
+                                grains.get(tmpID).angle, cells[i][j].x, cells[i][j].y,
                                 grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
                     }
                     cells[i][j].changeState();
@@ -52,15 +59,17 @@ public class CellularAutomata {
                     k--;
                     midStateCellsList.add(new CellCoordinate(i,j));
                 }
-                else if(cells[i+1][j].state == 3){
-                    tmpID = cells[i+1][j].grainID;
+                else if(cells[modulo(i + 1)][j].state == 3){
+                    cells[i][j].x = cells[modulo(i + 1)][j].x - 1;
+                    cells[i][j].y = cells[modulo(i + 1)][j].y;
+                    tmpID = cells[modulo(i + 1)][j].grainID;
                     cells[i][j].grainID = tmpID;
                     if(grains.get(tmpID).circle){
-                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
+                        cells[i][j].time = timeCircle(cells[i][j].x,cells[i][j].y,grains.get(tmpID).posX,grains.get(tmpID).posY);
                     }
                     else {
                         cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                grains.get(tmpID).angle, i, j,
+                                grains.get(tmpID).angle, cells[i][j].x, cells[i][j].y,
                                 grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
                     }
                     cells[i][j].changeState();
@@ -68,15 +77,17 @@ public class CellularAutomata {
                     k--;
                     midStateCellsList.add(new CellCoordinate(i,j));
                 }
-                else if(cells[i-1][j-1].state == 3){
-                    tmpID = cells[i-1][j-1].grainID;
+                else if(cells[modulo(i-1)][modulo(j-1)].state == 3){
+                    cells[i][j].x = cells[modulo(i-1)][modulo(j-1)].x + 1;
+                    cells[i][j].y = cells[modulo(i-1)][modulo(j-1)].y + 1;
+                    tmpID = cells[modulo(i-1)][modulo(j-1)].grainID;
                     cells[i][j].grainID = tmpID;
                     if(grains.get(tmpID).circle){
-                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
+                        cells[i][j].time = timeCircle(cells[i][j].x,cells[i][j].y,grains.get(tmpID).posX,grains.get(tmpID).posY);
                     }
                     else {
                         cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                grains.get(tmpID).angle, i, j,
+                                grains.get(tmpID).angle, cells[i][j].x, cells[i][j].y,
                                 grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
                     }
                     cells[i][j].changeState();
@@ -84,15 +95,17 @@ public class CellularAutomata {
                     k--;
                     midStateCellsList.add(new CellCoordinate(i,j));
                 }
-                else if(cells[i][j-1].state == 3){
-                    tmpID = cells[i][j-1].grainID;
+                else if(cells[i][modulo(j-1)].state == 3){
+                    cells[i][j].x = cells[i][modulo(j-1)].x;
+                    cells[i][j].y = cells[i][modulo(j-1)].y + 1;
+                    tmpID = cells[i][modulo(j-1)].grainID;
                     cells[i][j].grainID = tmpID;
                     if(grains.get(tmpID).circle){
-                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
+                        cells[i][j].time = timeCircle(cells[i][j].x,cells[i][j].y,grains.get(tmpID).posX,grains.get(tmpID).posY);
                     }
                     else {
                         cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                grains.get(tmpID).angle, i, j,
+                                grains.get(tmpID).angle, cells[i][j].x, cells[i][j].y,
                                 grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
                     }
                     cells[i][j].changeState();
@@ -100,15 +113,17 @@ public class CellularAutomata {
                     k--;
                     midStateCellsList.add(new CellCoordinate(i,j));
                 }
-                else if(cells[i+1][j-1].state == 3){
-                    tmpID = cells[i+1][j-1].grainID;
+                else if(cells[modulo(i+1)][modulo(j-1)].state == 3){
+                    cells[i][j].x = cells[modulo(i+1)][modulo(j-1)].x - 1;
+                    cells[i][j].y = cells[modulo(i+1)][modulo(j-1)].y + 1;
+                    tmpID = cells[modulo(i+1)][modulo(j-1)].grainID;
                     cells[i][j].grainID = tmpID;
                     if(grains.get(tmpID).circle){
-                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
+                        cells[i][j].time = timeCircle(cells[i][j].x,cells[i][j].y,grains.get(tmpID).posX,grains.get(tmpID).posY);
                     }
                     else {
                         cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                grains.get(tmpID).angle, i, j,
+                                grains.get(tmpID).angle, cells[i][j].x, cells[i][j].y,
                                 grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
                     }
                     cells[i][j].changeState();
@@ -116,15 +131,17 @@ public class CellularAutomata {
                     k--;
                     midStateCellsList.add(new CellCoordinate(i,j));
                 }
-                else if(cells[i-1][j+1].state == 3){
-                    tmpID = cells[i-1][j+1].grainID;
+                else if(cells[modulo(i-1)][modulo(j+1)].state == 3){
+                    cells[i][j].x = cells[modulo(i-1)][modulo(j+1)].x + 1;
+                    cells[i][j].y = cells[modulo(i-1)][modulo(j+1)].y - 1;
+                    tmpID = cells[modulo(i-1)][modulo(j+1)].grainID;
                     cells[i][j].grainID = tmpID;
                     if(grains.get(tmpID).circle){
-                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
+                        cells[i][j].time = timeCircle(cells[i][j].x,cells[i][j].y,grains.get(tmpID).posX,grains.get(tmpID).posY);
                     }
                     else {
                         cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                grains.get(tmpID).angle, i, j,
+                                grains.get(tmpID).angle, cells[i][j].x, cells[i][j].y,
                                 grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
                     }
                     cells[i][j].changeState();
@@ -132,15 +149,17 @@ public class CellularAutomata {
                     k--;
                     midStateCellsList.add(new CellCoordinate(i,j));
                 }
-                else if(cells[i][j+1].state == 3){
-                    tmpID = cells[i][j+1].grainID;
+                else if(cells[i][modulo(j+1)].state == 3){
+                    cells[i][j].x = cells[i][modulo(j+1)].x;
+                    cells[i][j].y = cells[i][modulo(j+1)].y - 1;
+                    tmpID = cells[i][modulo(j+1)].grainID;
                     cells[i][j].grainID = tmpID;
                     if(grains.get(tmpID).circle){
-                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
+                        cells[i][j].time = timeCircle(cells[i][j].x,cells[i][j].y,grains.get(tmpID).posX,grains.get(tmpID).posY);
                     }
                     else {
                         cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                grains.get(tmpID).angle, i, j,
+                                grains.get(tmpID).angle, cells[i][j].x, cells[i][j].y,
                                 grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
                     }
                     cells[i][j].changeState();
@@ -148,15 +167,17 @@ public class CellularAutomata {
                     k--;
                     midStateCellsList.add(new CellCoordinate(i,j));
                 }
-                else if(cells[i+1][j+1].state == 3){
-                    tmpID = cells[i+1][j+1].grainID;
+                else if(cells[modulo(i+1)][modulo(j+1)].state == 3){
+                    cells[i][j].x = cells[modulo(i+1)][modulo(j+1)].x - 1;
+                    cells[i][j].y = cells[modulo(i+1)][modulo(j+1)].y - 1;
+                    tmpID = cells[modulo(i+1)][modulo(j+1)].grainID;
                     cells[i][j].grainID = tmpID;
                     if(grains.get(tmpID).circle){
-                        cells[i][j].time = timeCircle(i,j,grains.get(tmpID).posX,grains.get(tmpID).posY);
+                        cells[i][j].time = timeCircle(cells[i][j].x,cells[i][j].y,grains.get(tmpID).posX,grains.get(tmpID).posY);
                     }
                     else {
                         cells[i][j].time = timeRectangle(grains.get(tmpID).side1, grains.get(tmpID).side2,
-                                grains.get(tmpID).angle, i, j,
+                                grains.get(tmpID).angle, cells[i][j].x, cells[i][j].y,
                                 grains.get(cells[i][j].grainID).posX, grains.get(cells[i][j].grainID).posY);
                     }
                     cells[i][j].changeState();
@@ -187,26 +208,26 @@ public class CellularAutomata {
                     cells[i][j].changeState();
                     midStateCellsList.remove(k);
                     k--;
-                    if(cells[i+1][j].grainID != -1) {
-                        if (cells[i+1][j].grainID != cells[i][j].grainID) {
+                    if(cells[modulo(i+1)][j].grainID != -1) {
+                        if (cells[modulo(i+1)][j].grainID != cells[i][j].grainID) {
                             cells[i][j].changeState();
                             continue;
                         }
                     }
-                    if(cells[i-1][j].grainID != -1) {
-                        if (cells[i-1][j].grainID != cells[i][j].grainID) {
+                    if(cells[modulo(i-1)][j].grainID != -1) {
+                        if (cells[modulo(i-1)][j].grainID != cells[i][j].grainID) {
                             cells[i][j].changeState();
                             continue;
                         }
                     }
-                    if(cells[i][j+1].grainID != -1) {
-                        if (cells[i][j+1].grainID != cells[i][j].grainID) {
+                    if(cells[i][modulo(j+1)].grainID != -1) {
+                        if (cells[i][modulo(j+1)].grainID != cells[i][j].grainID) {
                             cells[i][j].changeState();
                             continue;
                         }
                     }
-                    if(cells[i][j-1].grainID != -1) {
-                        if (cells[i][j-1].grainID != cells[i][j].grainID) {
+                    if(cells[i][modulo(j-1)].grainID != -1) {
+                        if (cells[i][modulo(j-1)].grainID != cells[i][j].grainID) {
                             cells[i][j].changeState();
                             continue;
                         }
@@ -214,30 +235,19 @@ public class CellularAutomata {
                 }
         }
     }
+
     public void addGrain(){
-        grains.add(new Grain(250,250,255,0,0, true, 0, 0, 0));
-        cells[250][250].changeState();
-        cells[250][250].changeState();
-        cells[250][250].changeState();
-        cells[250][250].grainID = grains.getLast().ID;
-
-        grains.add(new Grain(75,75,0,255,0, false, 1, 2, 30));
-        cells[75][75].changeState();
-        cells[75][75].changeState();
-        cells[75][75].changeState();
-        cells[75][75].grainID = grains.getLast().ID;
-
-        grains.add(new Grain(400,400,0,0,255, false, 1, 1, 45));
-        cells[400][400].changeState();
-        cells[400][400].changeState();
-        cells[400][400].changeState();
-        cells[400][400].grainID = grains.getLast().ID;
-
-        grains.add(new Grain(120,300,255,0,255, false, 2, 1, 7));
-        cells[120][300].changeState();
-        cells[120][300].changeState();
-        cells[120][300].changeState();
-        cells[120][300].grainID = grains.getLast().ID;
+        int x = 99;
+        int y = 99;
+        grains.add(new Grain(x, y, 255, 0, 0,
+                true,0,0,0));
+        cells[x][y].changeState();
+        cells[x][y].changeState();
+        cells[x][y].changeState();
+        cells[x][y].grainID = grains.getLast().ID;
+        addNeighbours(x,y);
+        cells[x][y].x = x;
+        cells[x][y].y = y;
     }
 
     public void addRandomGrain(){
@@ -267,16 +277,21 @@ public class CellularAutomata {
             cells[x][y].grainID = grains.getLast().ID;
         }
         addNeighbours(x,y);
+        cells[x][y].x = x;
+        cells[x][y].y = y;
     }
 
     private void addNeighbours(int x, int y){
         boolean flag;
+        int tmpX, tmpY;
         for(int i = -1; i < 2; i++) {
             for (int j = -1; j < 2; j++){
                 if(!(i == 0 && j == 0)){
+                    tmpX = modulo(x + i);
+                    tmpY = modulo(y + j);
                     flag = false;
                     for(int k = 0; k < availableCellsList.size(); k++){
-                        if(availableCellsList.get(k).isAlready(x + i, y + j)){
+                        if(availableCellsList.get(k).isAlready(tmpX,tmpY)) {
                             flag = true;
                             break;
                         }
@@ -284,22 +299,22 @@ public class CellularAutomata {
                     if(flag){
                         continue;
                     }
-                    if(cells[x+i][y+j].state != 0){
+                    if(cells[tmpX][tmpY].state != 0){
                         continue;
                     }
-                    if(x + i == 0){
-                        continue;
-                    }
-                    if(x + i == numberOfCells-1){
-                        continue;
-                    }
-                    if(y + j == 0){
-                        continue;
-                    }
-                    if(y + j == numberOfCells-1){
-                        continue;
-                    }
-                    availableCellsList.add(new CellCoordinate(x+i, y+j));
+//                    if(x + i == 0){
+//                        continue;
+//                    }
+//                    if(x + i == numberOfCells-1){
+//                        continue;
+//                    }
+//                    if(y + j == 0){
+//                        continue;
+//                    }
+//                    if(y + j == numberOfCells-1){
+//                        continue;
+//                    }
+                    availableCellsList.add(new CellCoordinate(tmpX, tmpY));
                 }
             }
         }

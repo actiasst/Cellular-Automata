@@ -69,8 +69,9 @@ class MyCanvas extends Canvas
     CellularAutomata cellularAutomata = new CellularAutomata(800,false);
     public MyCanvas() {
         setSize(900, 900);
-        for(int i = 0; i < 100; i++){
+        for(int i = 0; i < 10; i++){
             cellularAutomata.addRandomGrain();
+            //cellularAutomata.addGrain();
         }
     }
     public void paint(Graphics g)

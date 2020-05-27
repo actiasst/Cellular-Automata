@@ -4,6 +4,8 @@ class Cell{
     public int state;
     public double time;
     public int grainID;
+    public int x;
+    public int y;
 
     public Cell(){
         state = 0;
