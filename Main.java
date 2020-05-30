@@ -66,7 +66,7 @@ class CanvasExample extends WindowAdapter
 }
 class MyCanvas extends Canvas
 {
-    CellularAutomata cellularAutomata = new CellularAutomata(800,false);
+    CellularAutomata cellularAutomata = new CellularAutomata( 800,false, false);
     public MyCanvas() {
         setSize(900, 900);
         for(int i = 0; i < 10; i++){
@@ -82,18 +82,31 @@ class MyCanvas extends Canvas
                     cellularAutomata.grains.get(i).G,
                     cellularAutomata.grains.get(i).B);
         }
-        for(int i = 1; i < cellularAutomata.numberOfCells - 1; i++) {
-            for(int j = 1; j < cellularAutomata.numberOfCells - 1; j++) {
+        int Size = cellularAutomata.numberOfCells/3;
+        for(int i = Size; i < Size*2; i++) {
+            for(int j = Size; j < Size*2; j++) {
                 if(cellularAutomata.cells[i][j].state == 3) {
                     g.setColor(colorTable[cellularAutomata.cells[i][j].grainID]);
-                    g.fillRect(i + 50,j + 50,1,1);
+                    g.fillRect(i + 50 - Size,j + 50 - Size,1,1);
                 }
                 else if(cellularAutomata.cells[i][j].state == 4){
                     g.setColor(Color.black);
-                    g.fillRect(i + 50,j + 50,1,1);
+                    g.fillRect(i + 50 - Size,j + 50 - Size,1,1);
                 }
             }
         }
+//        for(int i = 0; i < cellularAutomata.numberOfCells - 1; i++) {
+//            for(int j = 0; j < cellularAutomata.numberOfCells - 1; j++) {
+//                if(cellularAutomata.cells[i][j].state==3) {
+//                    g.setColor(colorTable[cellularAutomata.cells[i][j].grainID]);
+//                    g.fillRect(i + 50,j + 50,1,1);
+//                }
+//                else if(cellularAutomata.cells[i][j].state == 4){
+//                    g.setColor(Color.black);
+//                    g.fillRect(i + 50,j + 50,1,1);
+//                }
+//            }
+//        }
     }
     public void calculate1() {
         for (int i = 0; i < 1; i++) {
@@ -114,11 +127,15 @@ class MyCanvas extends Canvas
         repaint();
     }
     public void calculate1000() {
+        long start, stop;
+        start = System.currentTimeMillis();
         while(true){
             if(cellularAutomata.calculate() == 0){
                 break;
             }
         }
+        stop = System.currentTimeMillis();
         repaint();
+        System.out.println("Elapsed time: " + (stop - start)/1000. +"s");
     }
 }

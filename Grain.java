@@ -12,6 +12,8 @@ class Grain{
     public double side1;
     public double side2;
     public double angle;
+    public boolean lbx;
+    public boolean lby;
 
     public Grain(int posX, int posY, int r, int g, int b, boolean circle, double side1, double side2, double angle) {
         this.posX = posX;
@@ -25,5 +27,7 @@ class Grain{
         B = b;
         ID = GrainID;
         GrainID++;
+        lbx = true;
+        lby = true;
     }
 }
